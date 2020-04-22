@@ -70,6 +70,7 @@ normed_test_data = norm(test_dataset)
 MatrixAll=[] ###Matrix for definign the minimum of minimization
 MatrixModel=[] #### Matrix for the models
 MatrixModelIteration=[]
+
 for i0 in range(1):
     for i1 in range(5):
         for i2 in range(0,i1+1):
