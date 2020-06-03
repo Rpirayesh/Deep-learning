@@ -7,20 +7,13 @@ Created on Fri Jul 19 15:15:13 2019
 from __future__ import absolute_import, division, print_function, unicode_literals
 import time
 t0= time.clock()
-import pathlib
-import matplotlib.pyplot as plt
 import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-import numpy as np
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras.regularizers import l1
-from tensorflow.keras.regularizers import l2
-from tensorflow.keras.constraints import max_norm
-import pickle
 
 
 #from keras.callbacks import ModelCheckpoint
