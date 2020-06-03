@@ -6,36 +6,32 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
 
-a = 1
-b = 1000000
+total_configurations = 10
 
-perrank = b//size
-summ = numpy.zeros(1)
+per_rank = total_configurations//size
+
+# print important info
+if rank == 0:
+    print('-'*30)
+    print("Number of ranks:", size)
+    print("Total number of configurations: ", total_configurations)
+    print("Configurations per rank: ", per_rank)
+    print('-'*30)
 
 comm.Barrier()
 start_time = time.time()
 
-temp = 0
-for i in range(a + rank*perrank, a + (rank+1)*perrank):
-    temp = temp + i
-
-summ[0] = temp
-
-if rank == 0:
-    total = numpy.zeros(1)
-else:
-    total = None
+for conf in range(1 + rank*per_rank, 1 + (rank+1)*per_rank):
+    print("I am rank ", rank, " running conf ", conf)
 
 comm.Barrier()
-#collect the partial results and add to the total sum
-comm.Reduce(summ, total, op=MPI.SUM, root=0)
-
-stop_time = time.time()
 
 if rank == 0:
-    #add the rest numbers to 1 000 000
-    for i in range(a + (size)*perrank, b+1):
-        total[0] = total[0] + i
-    print ("The sum of numbers from 1 to 1 000 000: ", int(total[0]))
-    print ("time spent with ", size, " threads in milliseconds")
-    print ("-----", int((stop_time-start_time)*1000), "-----")
+    # Process remaining configurations
+    for conf in range(1 + (size)*per_rank, total_configurations+1):
+        print("I am rank ", rank, " running conf ", conf)
+    stop_time = time.time()
+    total_time = int((stop_time-start_time)*1000)
+    print('-'*30)
+    print("time spent with ", size, " ranks: ", total_time, "ms")
+    print('-'*30)

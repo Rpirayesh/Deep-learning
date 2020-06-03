@@ -14,6 +14,10 @@ import numpy as np
 from tensorflow.keras.callbacks import ModelCheckpoint
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
+
+import time
+start_time = time.time()
+
 ##Load the dataset
 dataset= pd.read_csv('dataset.csv') # read data set using pandas
 InputData=dataset.copy()
@@ -71,7 +75,7 @@ def build_model():
 model = build_model()
 
                         ## Using the the epoch approach  
-EPOCHS = 1210
+EPOCHS = 100
                         
 model = build_model()
                         
@@ -79,13 +83,15 @@ model = build_model()
                         
                         # The patience parameter is the amount of epochs to check for improvement
                         
-early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=50) 
-mc = ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', verbose=0, save_best_only=True)                     
+early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=100) 
+#mc = ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', verbose=0, save_best_only=True)                     
 history =model.fit(normed_train_data, train_labels, epochs=EPOCHS,
-                                            validation_split = 0.2, verbose=0, callbacks=[early_stop,mc])
+                                            validation_split = 0.2, verbose=1, callbacks=[early_stop])
                         ## saving the model
                         #MatrixModelAll.append(model)
                         ## Testing error
-saved_model = load_model('best_model.h5')
-loss, mse, mape = saved_model.evaluate(normed_test_data, test_labels, verbose=0)
-print(mape)
+#saved_model = load_model('best_model.h5')
+#loss, mse, mape = saved_model.evaluate(normed_test_data, test_labels, verbose=0)
+#print(mape)
+
+print("--- %s seconds ---" % (time.time() - start_time))
