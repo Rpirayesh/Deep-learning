@@ -87,7 +87,7 @@ for i in range(K_fold):
     IndEnd=(i+1)*counter
     IndBeging=i*counter
 #    print(IndEnd)
-    test_dataset = InputData[IndBeging:IndEnd]
+    test_dataset = InputData[int(IndBeging):int(IndEnd)]
     train_dataset = InputData.drop(test_dataset.index)
     
     
@@ -97,7 +97,7 @@ for i in range(K_fold):
     test_stats = test_dataset.describe()
     test_stats = train_stats.transpose()
     
-    test_labels = OutputData[IndBeging:IndEnd]
+    test_labels = OutputData[int(IndBeging):int(IndEnd)]
     train_labels = OutputData.drop(test_labels.index)
     ### Calling the normalized data
     normed_train_data = norm(train_dataset,train_stats)
