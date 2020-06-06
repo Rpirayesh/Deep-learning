@@ -102,16 +102,16 @@ def compile_model(ModelInfo):
 ###########Callbacks
 # The patience parameter is the amount of epochs to check for improvement
 
-    early_stop =EarlyStopping(monitor='val_loss', patience=140)
-    mc = ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', verbose=0, save_best_only=True)
+    early_stop =EarlyStopping(monitor='val_loss', patience=2)
+    #mc = ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', verbose=0, save_best_only=True)
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
                               patience=5, min_lr=0.001)
 #Train the model and save it
     model.fit(normed_train_data, train_labels,batch_size=ModelInfo['Batches'][0], epochs=ModelInfo['Epochs'][0],
-                    validation_split = 0.2, verbose=0, callbacks=[early_stop,mc, reduce_lr])
-    saved_model = load_model('best_model.h5')
-    loss, mse, mape = saved_model.evaluate(normed_test_data, test_labels, verbose=0)
-    return saved_model, mape 
+                    validation_split = 0.2, verbose=0, callbacks=[early_stop, reduce_lr])
+    #saved_model = load_model('best_model.h5')
+    loss, mse, mape = model.evaluate(normed_test_data, test_labels, verbose=0)
+    return model, mape 
 
 
 ### Make the dictionary for the values

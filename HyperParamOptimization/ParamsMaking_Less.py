@@ -20,13 +20,13 @@ ModelInfo={}
 #ModelInfo['Nerouns_L2']=[160,80,400]
 #ModelInfo['Nerouns_L3']=[160,80,200]
 
-ModelInfo['Nerouns_L1']=[2,8,29]
-ModelInfo['Nerouns_L2']=[16,8,4]
-ModelInfo['Nerouns_L3']=[16,8,20]
+ModelInfo['Nerouns_L1']=[2560,80,2960]
+ModelInfo['Nerouns_L2']=[160,80,400]
+ModelInfo['Nerouns_L3']=[160,80,200]
 
 ModelInfo['Layers']=[1,2,3]
 
-ModelInfo['Dropout_Value_L1']=[0,0.2,0,4]
+ModelInfo['Dropout_Value_L1']=[0,0.2,0.4]
 
 
 ModelInfo['Reguralization_L1']=[l1(0.1),l2(0.2),l2(0.1)]
