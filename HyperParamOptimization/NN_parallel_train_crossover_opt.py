@@ -24,11 +24,13 @@ def create_csv(file_name, row_list):
         writer.writerows(row_list)
 
 
-def create_stats(gathered_num_conf, gathered_num_th_accuracy, gathered_num_update_mape,\
-                 gathered_mape, gathered_std, group_report_size, path, group):
+def create_stats(gathered_num_conf, gathered_num_th_accuracy,
+                 gathered_num_update_mape, gathered_mape,
+                 gathered_std, group_report_size, path, group):
     print("create stats")
     row_list = []
-    header = ['group', 'num_conf', 'num_th_accuracy', 'num_update_mape', 'optimal_mape', 'std_optimal']
+    header = ['group', 'num_conf', 'num_th_accuracy',
+              'num_update_mape', 'optimal_mape', 'std_optimal']
     row_list.append(header)
     for gp in range(0, group_report_size):
         row = []
@@ -39,7 +41,7 @@ def create_stats(gathered_num_conf, gathered_num_th_accuracy, gathered_num_updat
         row.append(gathered_mape[gp])
         row.append(gathered_std[gp])
         row_list.append(row)
-    file_name = '%s/group_%s_stats.csv' %(path, group)
+    file_name = '%s/group_%s_stats.csv' % (path, group)
     create_csv(file_name, row_list)
 
 
@@ -72,26 +74,30 @@ def get_config(conf, ModelInfo):
 # Make groups of ranks to process the crossover in a parallel way
 def make_groups(rank, crossover_size):
     group = rank // crossover_size
-    group_comm = MPI.COMM_WORLD.Split(group, rank);
+    group_comm = MPI.COMM_WORLD.Split(group, rank)
     group_rank = group_comm.Get_rank()
     group_size = group_comm.Get_size()
-    print("I am rank ", rank, "and my group is ", group, "where I am group_rank", group_rank)
+    print("I am rank ", rank, "and my group is ", group,
+          "where I am group_rank", group_rank)
     return group, group_comm, group_rank, group_size
 
 
-# Make group of ranks to report results 
+# Make group of ranks to report results
 def make_group_report(group_rank):
-    group_report_comm = MPI.COMM_WORLD.Split(group_rank, rank);
+    group_report_comm = MPI.COMM_WORLD.Split(group_rank, rank)
     group_report_rank = group_report_comm.Get_rank()
     group_report_size = group_report_comm.Get_size()
-    print("I am rank ", rank, "and my report group is ", group_rank, "where I am group_report_rank", group_report_rank)
+    print("I am rank ", rank, "and my report group is ", group_rank,
+          "where I am group_report_rank", group_report_rank)
     return group_report_comm, group_report_rank, group_report_size
 
 
-parser = argparse.ArgumentParser(description='Hperparameter search training NNs in parallel')
+des = 'Hperparameter search training NNs in parallel with crossover'
+parser = argparse.ArgumentParser(description=des)
 parser.add_argument('-tc', "--total_configurations", default=10, type=int,
                     help='Total number of NNs to train')
-parser.add_argument('-o', "--output", default='energy', choices=['energy', 'time', 'error'],
+choices = ['energy', 'time', 'error']
+parser.add_argument('-o', "--output", default='energy', choices=choices,
                     help='Output of the NNs')
 parser.add_argument('-obj', "--obj_file", default='filename_pi_10.obj',
                     help='Obj file with the configurations to train')
@@ -130,17 +136,17 @@ if rank == 0:
 
 comm.Barrier()
 group, group_comm, group_rank, group_size = make_groups(rank, crossover_size)
-group_report_comm, group_report_rank, group_report_size = make_group_report(group_rank)
+grp_rprt_comm, grp_rprt_rank, grp_rprt_size = make_group_report(group_rank)
 
 mape_optimal = np.zeros(2)
 
 comm.Barrier()
 start_time = time.time()
 
-hyperparam = ['id', 'Nerouns', 'Layers', 'Dropout_Value',\
-              'R_l1', 'R_l2',\
-              'kernel_constraint', 'Activation_Method',\
-              'Epochs', 'Batches', 'optimizer',\
+hyperparam = ['id', 'Nerouns', 'Layers', 'Dropout_Value',
+              'R_l1', 'R_l2',
+              'kernel_constraint', 'Activation_Method',
+              'Epochs', 'Batches', 'optimizer',
               'W_Initialization_Method']
 row_list = []
 group_row_list = []
@@ -170,7 +176,8 @@ for conf in range(group*per_rank, (group+1)*per_rank):
         group_row.append(average_mape)
         group_row.append(std_mape)
         group_row_list.append(group_row)
-        print("I am rank", rank, "and this are the mapes for conf", conf, ":", mapes, "average: ", average_mape, ", std: ", std_mape)
+        print("I am rank", rank, "and this are the mapes for conf", conf,
+              ":", mapes, "average: ", average_mape, ", std: ", std_mape)
         if mape_temp - average_mape > th_accuracy:
             num_th_accuracy = num_th_accuracy + 1
             count = 0.0
@@ -193,39 +200,34 @@ path = ''
 if rank == 0:
     now = datetime.datetime.now()
     dt_string = now.strftime("%Y%m%d_%H%M%S")
-    path = 'run_%s' %dt_string
+    path = 'run_%s' % dt_string
     try:
         os.mkdir(path)
     except:
         pass
 
 comm.Barrier()
-path = comm.bcast(path, root=0)   
-file_name = '%s/%s_output.csv' %(path, rank)
+path = comm.bcast(path, root=0)
+file_name = '%s/%s_output.csv' % (path, rank)
 create_csv(file_name, row_list)
 
 if group_rank == 0:
-    file_name = '%s/%s_group_output.csv' %(path, group)
+    file_name = '%s/%s_group_output.csv' % (path, group)
     create_csv(file_name, group_row_list)
 
-#gathered_row_list = comm.gather(row_list, root=0)
-#gathered_num_conf = comm.gather(num_conf, root=0)
-#gathered_num_th_accuracy = comm.gather(num_th_accuracy, root=0)
-#gathered_num_update_mape = comm.gather(num_update_mape, root=0)
-#gathered_mape_optimal = comm.gather(mape_optimal[0], root=0)
-gathered_num_conf = group_report_comm.gather(num_conf, root=0)
-gathered_num_th_accuracy = group_report_comm.gather(num_th_accuracy, root=0)
-gathered_num_update_mape = group_report_comm.gather(num_update_mape, root=0)
-gathered_mape_optimal = group_report_comm.gather(mape_optimal[0], root=0)
-gathered_std_optimal = group_report_comm.gather(std_temp, root=0)
+gathered_num_conf = grp_rprt_comm.gather(num_conf, root=0)
+gathered_num_th_accuracy = grp_rprt_comm.gather(num_th_accuracy, root=0)
+gathered_num_update_mape = grp_rprt_comm.gather(num_update_mape, root=0)
+gathered_mape_optimal = grp_rprt_comm.gather(mape_optimal[0], root=0)
+gathered_std_optimal = grp_rprt_comm.gather(std_temp, root=0)
 
 
 if rank == 0:
     print("I am rank 0 preparing statistics...")
-    create_stats(gathered_num_conf, gathered_num_th_accuracy,\
-                 gathered_num_update_mape, gathered_mape_optimal,\
-                 gathered_std_optimal,\
-                 group_report_size, path, group)
+    create_stats(gathered_num_conf, gathered_num_th_accuracy,
+                 gathered_num_update_mape, gathered_mape_optimal,
+                 gathered_std_optimal,
+                 grp_rprt_size, path, group)
     print("Statistics done")
 
 comm.Barrier()
@@ -234,7 +236,7 @@ mape_final = np.zeros(2)
 
 comm.Barrier()
 # Find the minimum MAPE across all ranks
-mape_final = group_report_comm.reduce(mape_optimal, op=MPI.MINLOC, root=0)
+mape_final = grp_rprt_comm.reduce(mape_optimal, op=MPI.MINLOC, root=0)
 
 comm.Barrier()
 mape_final = comm.bcast(mape_final, root=0)
@@ -243,12 +245,12 @@ comm.Barrier()
 #if rank == mape_final[1]:
 #    optimal_model_final = optimal_model_temp
 #    print("I am rank:", mape_final[1], "and I found the optimal model", optimal_model_final)
-    #print("I am rank:", mape_final[1], "and I found the optimal model")
+#    #print("I am rank:", mape_final[1], "and I found the optimal model")
 
 comm.Barrier()
-if rank == 0: 
-    print("The optimal mape is: ", mape_final[0], "found by group: ", mape_final[1])
-
+if rank == 0:
+    print("The optimal mape is: ", mape_final[0],
+          "found by group: ", mape_final[1])
     stop_time = time.time()
     total_time = int((stop_time-start_time)*1000)
     print('-'*30)
