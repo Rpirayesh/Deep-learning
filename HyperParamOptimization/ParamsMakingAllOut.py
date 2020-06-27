@@ -103,7 +103,7 @@ for i1 in (ModelInfo['Nerouns_L1']):
 										 g=g+1
                                                         		         print(k)
                                                         		         print(g)
-										 if g==1000000:
+										 if g==10000000:
 #                                                                 #####################################################Open the file and load the model
      										    EnergyParamF = open('EnergyParam.obj', 'rb') 
 										    ModelInfoLoaded = pickle.load(EnergyParamF)
