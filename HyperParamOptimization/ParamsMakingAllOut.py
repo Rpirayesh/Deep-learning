@@ -83,8 +83,8 @@ for i1 in (ModelInfo['Nerouns_L1']):
                                                                 for r in ModelInfo['optimizer']:
                                                                     
                                                                      for s1 in ModelInfo['W_Initialization_Method_L1']:
-                                                                         for s2 in ModelInfo['W_Initialization_Method_L2']:
-                                                                             for s3 in ModelInfo['W_Initialization_Method_L3']:
+#                                                                         for s2 in ModelInfo['W_Initialization_Method_L2']:
+#                                                                             for s3 in ModelInfo['W_Initialization_Method_L3']:
                                                                                  
                                                                                  ModelInfoMade['Nerouns']=[i1,i2,i3]
                                                                                  ModelInfoMade['Layers']=[j]
@@ -96,7 +96,7 @@ for i1 in (ModelInfo['Nerouns_L1']):
                                                                                  ModelInfoMade['Epochs']=[p]
                                                                                  ModelInfoMade['Batches']=[q]
                                                                                  ModelInfoMade['optimizer']=[r]
-                                                                                 ModelInfoMade['W_Initialization_Method']=[s1,s2,s3]
+                                                                                 ModelInfoMade['W_Initialization_Method']=[s1]
                                                                                  
                                                                                  TotalModelInfo.append(ModelInfoMade.copy())
                                                                                  k=k+1
