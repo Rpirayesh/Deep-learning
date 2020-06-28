@@ -31,9 +31,9 @@ ModelInfo['Nerouns_L3']=[160,80,200]
 
 ModelInfo['Layers']=[2,3]
 
-ModelInfo['Dropout_Value_L1']=[0,0.2,0,4]
-ModelInfo['Dropout_Value_L2']=[0,0.2,0,4]
-ModelInfo['Dropout_Value_L3']=[0,0.2,0,4]
+ModelInfo['Dropout_Value_L1']=[0,0.2,0.4]
+ModelInfo['Dropout_Value_L2']=[0,0.2,0.4]
+ModelInfo['Dropout_Value_L3']=[0,0.2,0.4]
 
 ModelInfo['Reguralization_L1']=[l1(0.1),l2(0.2),l2(0.1),l1(0.2),l2(0.3),l2(0.4)]
 ModelInfo['Reguralization_L2']=[l1(0.1),l2(0.2),l2(0.1),l1(0.2),l2(0.3),l2(0.4)]
