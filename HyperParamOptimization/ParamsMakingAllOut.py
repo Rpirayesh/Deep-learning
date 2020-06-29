@@ -55,7 +55,7 @@ ModelInfo['W_Initialization_Method_L3']=[keras.initializers.glorot_uniform(seed=
 
 TotalModelInfo=[]
 ModelInfoMade={}
-EnergyParamF = open('EnergyParam.obj', 'wb')
+EnergyParamF = open('EnergyParam_06272020_b.obj', 'wb')
 pickle.dump(TotalModelInfo, EnergyParamF)
 k=0
 g=0
@@ -100,34 +100,22 @@ for i1 in (ModelInfo['Nerouns_L1']):
                                                                                  
                                                                                  TotalModelInfo.append(ModelInfoMade.copy())
                                                                                  k=k+1
-										 g=g+1
-                                                        		         print(k)
-                                                        		         print(g)
-										 if g==10000000:
+                                                                                 g=g+1
+                                                                                 print(k)
+                                                                                 print(g)
+                                                                                 if g == 10000000:
 #                                                                 #####################################################Open the file and load the model
-     										    EnergyParamF = open('EnergyParam.obj', 'rb') 
-										    ModelInfoLoaded = pickle.load(EnergyParamF)
-										    ModelInfoLoaded.append(TotalModelInfo)
-							 			    EnergyParamF = open('EnergyParam.obj', 'wb') 
-							 			    pickle.dump(TotalModelInfo, EnergyParamF)
-										    g=0
-								 		    TotalModelInfo =[]
-							  
-                                                    
-                                        
-                
-                    
-                                   
-                                        
-                            
-            
-        
-            
-    
-    
-EnergyParamF = open('EnergyParam.obj', 'rb')
+                                                                                         EnergyParamF = open('EnergyParam_06272020_b.obj', 'rb') 
+                                                                                         ModelInfoLoaded = pickle.load(EnergyParamF)
+                                                                                         ModelInfoLoaded.append(TotalModelInfo)
+                                                                                         EnergyParamF = open('EnergyParam_06272020_b.obj', 'wb') 
+                                                                                         pickle.dump(TotalModelInfo, EnergyParamF)
+                                                                                         g=0
+                                                                                         TotalModelInfo =[]
+
+EnergyParamF = open('EnergyParam_06272020_b.obj', 'rb')
 ModelInfoLoaded = pickle.load(EnergyParamF) 
 ModelInfoLoaded.append(TotalModelInfo)
 shuffle(TotalModelInfo)
-EnergyParamF = open('EnergyParam.obj', 'wb')
+EnergyParamF = open('EnergyParam_06272020_b.obj', 'wb')
 pickle.dump(TotalModelInfo, EnergyParamF)
