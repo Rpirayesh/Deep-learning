@@ -106,8 +106,8 @@ def create_model(ModelInfo):
         print('Index=',c) 
         model.add(layers.Dense(ModelInfo['Nerouns'][c],
                                activation=tf.nn.relu, 
-                               kernel_initializer =ModelInfo['W_Initialization_Method'][c],
-                            bias_initializer = ModelInfo['W_Initialization_Method'][c],
+                               kernel_initializer =ModelInfo['W_Initialization_Method'][0],
+                            bias_initializer = ModelInfo['W_Initialization_Method'][0],
                             activity_regularizer=ModelInfo['Reguralization'][c],
                             kernel_constraint=ModelInfo['kernel_constraint'][c])),
         model.add(layers.Dropout(ModelInfo['Dropout_Value'][c])),
