@@ -4,7 +4,12 @@ Created on Sun June 7 16:14:49 2020
 
 @author: JorgeDiaz
 """
-from OptimizedFunction import compile_model
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname("FinalOpt/")))
+from  OPTFinal import *
+
+#from OptimizedFunction import compile_model
 import pickle
 import numpy as np
 from mpi4py import MPI
@@ -44,22 +49,22 @@ def create_stats(gathered_num_conf, gathered_num_th_accuracy,
     create_csv(file_name, row_list)
 
 
-def get_config(conf, ModelInfo):
+def get_config(ModelInfo):
     row = []
-    row.append(conf)
-    row.append(ModelInfo[conf]['Nerouns'])
-    row.append(ModelInfo[conf]['Layers'])
-    row.append(ModelInfo[conf]['Dropout_Value'])
-    r = ModelInfo[conf]['Reguralization']
+    #row.append(conf)
+    row.append(ModelInfo['Nerouns'])
+    row.append(ModelInfo['Layers'])
+    row.append(ModelInfo['Dropout_Value'])
+    r = ModelInfo['Reguralization']
     row.append(r[0].l1)
     row.append(r[0].l2)
-    c = ModelInfo[conf]['kernel_constraint']
+    c = ModelInfo['kernel_constraint']
     row.append(c[0].max_value)
-    row.append(ModelInfo[conf]['Activation_Method'][0])
-    row.append(ModelInfo[conf]['Epochs'][0])
-    row.append(ModelInfo[conf]['Batches'][0])
-    row.append(ModelInfo[conf]['optimizer'][0])
-    w = ModelInfo[conf]['W_Initialization_Method']
+    row.append(ModelInfo['Activation_Method'][0])
+    row.append(ModelInfo['Epochs'][0])
+    row.append(ModelInfo['Batches'][0])
+    row.append(ModelInfo['optimizer'][0])
+    w = ModelInfo['W_Initialization_Method']
     w_config = w[0].get_config()
     try:
         d = w_config['distribution']
@@ -150,6 +155,11 @@ if __name__ == "__main__":
             pass
     comm.Barrier()
 
+    # Load data and configurations 
+    Portion=0.5
+    Feature='Energy'
+    InputData,Output,Model=Output_moddel_Data(Portion, Feature)
+
     start_time = time.time()
     hyperparam = ['id', 'Nerouns', 'Layers', 'Dropout_Value',
                   'R_l1', 'R_l2',
@@ -167,19 +177,20 @@ if __name__ == "__main__":
     mape_optimal = np.zeros(2)
     
     for conf in range(group*per_rank, (group+1)*per_rank):
+        print("I am rank", rank, "running config", conf)
         mapes = []
         num_conf = num_conf + 1
         count = count + 1.0
-        row = get_config(conf, ModelInfo)
-        group_row = get_config(conf, ModelInfo)
-        saved_model, mape = compile_model(ModelInfo[conf]) # send also group rank and group size and type of output
+        evaluated_model, saved_model, mape = compile_model(conf, group_rank, group_size, InputData,Output,Model) # send also group rank and group size and type of output
         #mape = randrange(100) + rank
+        row = get_config(evaluated_model)
+        group_row = get_config(evaluated_model)
         row.append(mape)
         row_list.append(row)
         group_comm.Barrier()
         mapes = group_comm.gather(mape, root=0)
         if group_rank == 0:
-            group_row = get_config(conf, ModelInfo)
+            group_row = get_config(evaluated_model)
             average_mape = np.average(mapes)
             std_mape = np.std(mapes)
             group_row.append(average_mape)
