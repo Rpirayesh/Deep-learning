@@ -28,7 +28,7 @@ import pickle
 #saved_model = load_model('best_model.h5')
 
 ##load data 
-dataset= pd.read_csv('dataset.csv') # read data set using pandas
+dataset= pd.read_csv('DataI300Q7893.csv') # read data set using pandas
 
 
 #np.random.shuffle(dataset.values)
@@ -56,7 +56,7 @@ def Output_moddel_Data(Portion, Feature):
 #    Model=ParamDB[Feature]
     File=Feature+'Param.obj'
     filehandler = open(File, 'rb') 
-    Model=pickle.load(filehandler, fix_imports=True, encoding='latin1', errors="strict")
+    Model=pickle.load(filehandler)
     return InputData,Output,Model
 
 #InputData,Output,Model=Output_moddel_Data(Portion, Feature)
@@ -97,21 +97,26 @@ def create_model(ModelInfo):
     model = keras.Sequential()
     model.add(layers.Dense(ModelInfo['Nerouns'][0], input_shape=[7],
                            activation=ModelInfo['Activation_Method'][0],
-                           kernel_initializer =ModelInfo['W_Initialization_Method'][0],
-                            bias_initializer = ModelInfo['W_Initialization_Method'][0],
-                            activity_regularizer=ModelInfo['Reguralization'][0],
-    kernel_constraint=ModelInfo['kernel_constraint'][0])),
+#                           kernel_initializer =ModelInfo['W_Initialization_Method'][0],
+#                            bias_initializer = ModelInfo['W_Initialization_Method'][0],
+#                            activity_regularizer=ModelInfo['Reguralization'][0],
+                             activity_regularizer=l1(ModelInfo['Reguralization'][0]),
+
+#    kernel_constraint=ModelInfo['kernel_constraint'][0])),
+     kernel_constraint=max_norm(ModelInfo['kernel_constraint'][0]))),
     model.add(layers.Dropout(ModelInfo['Dropout_Value'][0])),
     for c in range(1,ModelInfo['Layers'][0]):
-        #print('Index=',c) 
+        print('Index=',c) 
         model.add(layers.Dense(ModelInfo['Nerouns'][c],
                                activation=tf.nn.relu, 
-                               kernel_initializer =ModelInfo['W_Initialization_Method'][0],
-                            bias_initializer = ModelInfo['W_Initialization_Method'][0],
-                            activity_regularizer=ModelInfo['Reguralization'][c],
-                            kernel_constraint=ModelInfo['kernel_constraint'][c])),
+#                               kernel_initializer =ModelInfo['W_Initialization_Method'][0],
+#                            bias_initializer = ModelInfo['W_Initialization_Method'][0],
+#                            activity_regularizer=ModelInfo['Reguralization'][c],
+                             activity_regularizer=l1(ModelInfo['Reguralization'][c]),
+#                            kernel_constraint=ModelInfo['kernel_constraint'][c])),
+                             kernel_constraint=max_norm(ModelInfo['kernel_constraint'][c]))),
         model.add(layers.Dropout(ModelInfo['Dropout_Value'][c])),
-        model.add(layers.BatchNormalization()),
+#        model.add(layers.BatchNormalization()),
         
     
     model.add(layers.Dense(1, activation=ModelInfo['Activation_Method'][0])),
@@ -119,11 +124,13 @@ def create_model(ModelInfo):
 
 
 def compile_model(CountParam,CrossCount,K_fold,InputData,Output,Model):
-    m=len(Model[1])
+    m=len(Model[0])
     Indx=int(np.floor(CountParam/m))
     Indy=CountParam-Indx*m-1
-    ModelInfo=Model[int(Indx)][int(Indy)]
-    #print('ModelInfo=',ModelInfo)
+#    ModelInfo=Model[int(Indx)][int(Indy)]
+    ModelInfo=Model[CountParam]
+    
+    print('ModelInfo=',ModelInfo)
 ####Call the model and assign the loss function to it
     model=create_model(ModelInfo)
 
@@ -136,7 +143,7 @@ def compile_model(CountParam,CrossCount,K_fold,InputData,Output,Model):
 # The patience parameter is the amount of epochs to check for improvement
 
     early_stop =EarlyStopping(monitor='val_loss', patience=50)
-    #mc = ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', verbose=0, save_best_only=True)
+    mc = ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', verbose=0, save_best_only=True)
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
                               patience=5, min_lr=0.001)
     
@@ -144,9 +151,8 @@ def compile_model(CountParam,CrossCount,K_fold,InputData,Output,Model):
     normed_train_data,normed_test_data,train_labels,test_labels=CR(CrossCount,K_fold,InputData,Output)
 #Train the model and save it
     model.fit(normed_train_data, train_labels,batch_size=ModelInfo['Batches'][0], epochs=ModelInfo['Epochs'][0],
-                    validation_split = 0.2, verbose=0, callbacks=[early_stop, reduce_lr])
-    #saved_model = load_model('best_model.h5')
+                    validation_split = 0.2, verbose=0, callbacks=[early_stop,mc, reduce_lr])
+    saved_model = load_model('best_model.h5')
 #Test the model
-    loss, mse, mape = model.evaluate(normed_test_data, test_labels, verbose=0)
-    return ModelInfo, model, mape 
-
+    loss, mse, mape = saved_model.evaluate(normed_test_data, test_labels, verbose=0)
+    return mape 
