@@ -156,3 +156,7 @@ def compile_model(CountParam,CrossCount,K_fold,InputData,Output,Model):
 #Test the model
     loss, mse, mape = saved_model.evaluate(normed_test_data, test_labels, verbose=0)
     return mape 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 2a63a742269d4a06020a194d5bbc355d6ceeda95
