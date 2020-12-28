@@ -130,7 +130,7 @@ def compile_model(CountParam,CrossCount,K_fold,InputData,Output,Model):
 #    ModelInfo=Model[int(Indx)][int(Indy)]
     ModelInfo=Model[CountParam]
     
-    print('ModelInfo=',ModelInfo)
+#    print('ModelInfo=',ModelInfo)
 ####Call the model and assign the loss function to it
     model=create_model(ModelInfo)
 
@@ -142,7 +142,7 @@ def compile_model(CountParam,CrossCount,K_fold,InputData,Output,Model):
 ###########Callbacks
 # The patience parameter is the amount of epochs to check for improvement
 
-    early_stop =EarlyStopping(monitor='val_loss', patience=50)
+    early_stop =EarlyStopping(monitor='val_loss', patience=ModelInfo['Patience'][0])
     mc = ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', verbose=0, save_best_only=True)
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
                               patience=5, min_lr=0.001)
@@ -155,8 +155,5 @@ def compile_model(CountParam,CrossCount,K_fold,InputData,Output,Model):
     saved_model = load_model('best_model.h5')
 #Test the model
     loss, mse, mape = saved_model.evaluate(normed_test_data, test_labels, verbose=0)
-    return mape 
-<<<<<<< HEAD
+    return mse, mape 
 
-=======
->>>>>>> 2a63a742269d4a06020a194d5bbc355d6ceeda95
