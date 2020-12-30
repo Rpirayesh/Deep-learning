@@ -123,12 +123,12 @@ def create_model(ModelInfo):
     return model
 
 
-def compile_model(CountParam,CrossCount,K_fold,InputData,Output,Model):
-    m=len(Model[0])
-    Indx=int(np.floor(CountParam/m))
-    Indy=CountParam-Indx*m-1
+def compile_model(CrossCount,K_fold,InputData,Output,ModelInfo):
+#    m=len(Model[0])
+#    Indx=int(np.floor(CountParam/m))
+#    Indy=CountParam-Indx*m-1
 #    ModelInfo=Model[int(Indx)][int(Indy)]
-    ModelInfo=Model[CountParam]
+#    ModelInfo=Model[CountParam]
     
 #    print('ModelInfo=',ModelInfo)
 ####Call the model and assign the loss function to it
