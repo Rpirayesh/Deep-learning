@@ -57,6 +57,7 @@ def Output_moddel_Data(Portion, Feature):
     File=Feature+'Param.obj'
     filehandler = open(File, 'rb') 
     Model=pickle.load(filehandler)
+
     return InputData,Output,Model
 
 #InputData,Output,Model=Output_moddel_Data(Portion, Feature)
@@ -123,17 +124,19 @@ def create_model(ModelInfo):
     return model
 
 
-def compile_model(CrossCount,K_fold,InputData,Output,ModelInfo):
-#    m=len(Model[0])
-#    Indx=int(np.floor(CountParam/m))
-#    Indy=CountParam-Indx*m-1
+def compile_model(CountParam,CrossCount,K_fold,InputData,Output,Model):
+    m=len(Model[0])
+    Indx=int(np.floor(CountParam/m))
+    Indy=CountParam-Indx*m-1
 #    ModelInfo=Model[int(Indx)][int(Indy)]
-#    ModelInfo=Model[CountParam]
+    ModelInfo=Model[CountParam]
     
-#    print('ModelInfo=',ModelInfo)
+    print('ModelInfo=',ModelInfo)
 ####Call the model and assign the loss function to it
+    print("\n***************Creating the model******************")
     model=create_model(ModelInfo)
 
+    print("\n***************Compiling the model******************")
     model.compile(loss='mean_absolute_percentage_error',
                                         optimizer=ModelInfo['optimizer'][0],
                                         metrics=['mean_squared_error','mean_absolute_percentage_error'])
@@ -142,18 +145,23 @@ def compile_model(CrossCount,K_fold,InputData,Output,ModelInfo):
 ###########Callbacks
 # The patience parameter is the amount of epochs to check for improvement
 
-    early_stop =EarlyStopping(monitor='val_loss', patience=ModelInfo['Patience'][0])
-    mc = ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', verbose=0, save_best_only=True)
+    early_stop =EarlyStopping(monitor='val_loss', patience=50)
+#    mc = ModelCheckpoint(filepath='best_model.h5', monitor='val_loss', verbose=0, save_best_only=True)
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
                               patience=5, min_lr=0.001)
     
 ## Provide the data within the cross fold
+    print("\n***************CR function******************")
     normed_train_data,normed_test_data,train_labels,test_labels=CR(CrossCount,K_fold,InputData,Output)
-#Train the model and save it
+    
+    #Train the model and save it
+    print("\n***************Fitting the model******************")
+    print(normed_train_data.head())
     model.fit(normed_train_data, train_labels,batch_size=ModelInfo['Batches'][0], epochs=ModelInfo['Epochs'][0],
-                    validation_split = 0.2, verbose=0, callbacks=[early_stop,mc, reduce_lr])
-    saved_model = load_model('best_model.h5')
-#Test the model
-    loss, mse, mape = saved_model.evaluate(normed_test_data, test_labels, verbose=0)
-    return mse, mape 
+                    validation_split = 0.2, verbose=0, callbacks=[early_stop, reduce_lr])
 
+    print("\n***************Saving the model******************")
+#    saved_model = load_model('best_model.h5')
+#Test the model
+    loss, mse, mape = model.evaluate(normed_test_data, test_labels, verbose=0)
+    return ModelInfo, model,  mape 

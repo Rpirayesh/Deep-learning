@@ -55,11 +55,16 @@ def get_config(ModelInfo):
     row.append(ModelInfo['Nerouns'])
     row.append(ModelInfo['Layers'])
     row.append(ModelInfo['Dropout_Value'])
-    r = ModelInfo['Reguralization']
-    row.append(r[0].l1)
-    row.append(r[0].l2)
-    c = ModelInfo['kernel_constraint']
-    row.append(c[0].max_value)
+
+    row.append(ModelInfo['Reguralization'])
+    #r = ModelInfo['Reguralization']
+    #row.append(r[0].l1)
+    #row.append(r[0].l2)
+
+    row.append(ModelInfo['kernel_constraint'])
+    #c = ModelInfo['kernel_constraint']
+    #row.append(c[0].max_value)
+
     row.append(ModelInfo['Activation_Method'][0])
     row.append(ModelInfo['Epochs'][0])
     row.append(ModelInfo['Batches'][0])
@@ -104,11 +109,11 @@ if __name__ == "__main__":
     choices = ['energy', 'time', 'error']
     parser.add_argument('-o', "--output", default='energy', choices=choices,
                         help='Output of the NNs')
-    parser.add_argument('-obj', "--obj_file", default='filename_pi_10.obj',
+    parser.add_argument('-obj', "--obj_file", default='EnergyParam.obj',
                         help='Obj file with the configurations to train')
     parser.add_argument('-tq', "--th_quantity", default=10, type=int,
                         help='Threshold quantity')
-    parser.add_argument('-ta', "--th_accuracy", default=1, type=int,
+    parser.add_argument('-ta', "--th_accuracy", default=1, type=float,
                         help='Threshold accuracy')
     parser.add_argument('-cs', "--crossover_size", default=1, type=int,
                         help='Threshold accuracy')
@@ -156,9 +161,11 @@ if __name__ == "__main__":
     comm.Barrier()
 
     # Load data and configurations 
-    Portion=0.5
+    Portion=1
     Feature='Energy'
     InputData,Output,Model=Output_moddel_Data(Portion, Feature)
+
+    print(InputData.head())
 
     start_time = time.time()
     hyperparam = ['id', 'Nerouns', 'Layers', 'Dropout_Value',
@@ -176,12 +183,16 @@ if __name__ == "__main__":
     num_update_mape = 0
     mape_optimal = np.zeros(2)
     
+    z=0
+
     for conf in range(group*per_rank, (group+1)*per_rank):
         print("I am rank", rank, "running config", conf)
         mapes = []
         num_conf = num_conf + 1
         count = count + 1.0
+
         evaluated_model, saved_model, mape = compile_model(conf, group_rank, group_size, InputData,Output,Model) # send also group rank and group size and type of output
+        
         #mape = randrange(100) + rank
         row = get_config(evaluated_model)
         group_row = get_config(evaluated_model)
@@ -201,11 +212,15 @@ if __name__ == "__main__":
             if mape_temp - average_mape > th_accuracy:
                 num_th_accuracy = num_th_accuracy + 1
                 count = 0.0
+                z = z+1
+                th_quantity = 10*z + th_quantity
+
             if average_mape < mape_temp:
                 num_update_mape = num_update_mape + 1
                 mape_temp = average_mape
                 std_temp = std_mape
                 optimal_model_temp = saved_model
+
         count = group_comm.bcast(count, root=0)
         if count > th_quantity:
             break
